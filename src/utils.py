@@ -48,7 +48,7 @@ def _read_csv(csv_file: str) -> list:
     # Если файл, указанный в переменной csv_file не существует, то вернуть пустой список.
     try:
         with open(csv_file, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter=";")
+            reader = csv.DictReader(f, delimiter=",")
             data = list(reader)
             logger.info(f"Данные из файла {csv_file} прочитаны.")
     except FileNotFoundError:
@@ -71,7 +71,7 @@ def _read_csv(csv_file: str) -> list:
 def _read_xlsx(xlsx_file: str) -> list:
     """Принимает на вход путь до XLSX-файла и возвращает список словарей с данными о финансовых транзакциях."""
     try:
-        excel_data = pd.read_excel(xlsx_file).to_dict(orient="records")
+        excel_data = pd.read_excel(xlsx_file, na_filter=False).to_dict(orient="records")
     except FileNotFoundError:
         logger.error(f"Файл {xlsx_file} не существует.")
         return []
@@ -105,4 +105,6 @@ def read_file(file_path: str) -> list[dict | None]:
 
 if __name__ == "__main__":
     # print(read_file("../data/operations.csv"))
-    print(read_file("../data/operations.xlsx"))
+    # print(read_file("../data/operations.xlsx"))
+    # print(read_file("../tests/tests_data/operations.xlsx"))
+    print(read_file("../tests/tests_data/operations.csv"))
