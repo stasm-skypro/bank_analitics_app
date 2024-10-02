@@ -18,21 +18,22 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     """
     # Если дата не передана, то используем текущую дату.
     if date is None:
-        date = datetime.datetime.now()
+        date = datetime.date.today()
     else:
-        date = datetime.datetime.strptime(date, "%d.%m.%Y %H:%M:%S")
+        date = datetime.datetime.strptime(date, "%d.%m.%Y")
 
     # Определяем дату на три месяца назад
     three_months_ago = date - datetime.timedelta(3 * 365.25 / 12)
     print(three_months_ago, date)
 
     # Преобразуем строки с датами в datetime объекты.
-    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+    transactions["Дата платежа"] = pd.to_datetime(transactions["Дата платежа"], format="%d.%m.%Y")
 
+    # Отрезаем нужные столбцы из датафрейма
     transactions = transactions.loc[
         :,
         [
-            "Дата операции",
+            "Дата платежа",
             "Сумма платежа",
             "Валюта платежа",
             "Категория",
@@ -41,14 +42,14 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
 
     filtered_transactions = transactions[
         (transactions["Категория"] == category)
-        & (transactions["Дата операции"] >= three_months_ago)
-        & (transactions["Дата операции"] <= date)
+        & (transactions["Дата платежа"] >= three_months_ago)
+        & (transactions["Дата платежа"] <= date)
     ]
 
-    sorted_transactions = filtered_transactions.sort_values(by="Дата операции", ascending=False)
+    sorted_transactions = filtered_transactions.sort_values(by="Дата платежа", ascending=False)
 
     # Преобразуем даты обратно в строковый формат
-    sorted_transactions["Дата операции"] = sorted_transactions["Дата операции"].dt.strftime("%d.%m.%Y %H:%M:%S")
+    sorted_transactions["Дата платежа"] = sorted_transactions["Дата платежа"].dt.strftime("%d.%m.%Y")
 
     return sorted_transactions
 
@@ -98,8 +99,8 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 if __name__ == "__main__":
     transactions_data = read_file("../data/operations.xlsx")
 
-    result = spending_by_category(transactions_data, "Супермаркеты", "31.12.2021 16:44:00")
+    result = spending_by_category(transactions_data, "Супермаркеты", "31.12.2021")
     print(result)
 
-    # result = spending_by_weekday(transactions_data, "31.12.2021 00:00:00")
+    # result = spending_by_weekday(transactions_data, "31.12.2021")
     # print(result)
