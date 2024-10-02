@@ -18,7 +18,7 @@ logger.addHandler(file_handler)
 def _read_csv(csv_file: str) -> pd.DataFrame | None:
     """Принимает на вход путь до CSV-файла и возвращает датафрейм."""
     try:
-        csv_data = pd.read_csv(csv_file)
+        csv_data = pd.read_csv(csv_file, delimiter=";")
     except FileNotFoundError:
         logger.error(f"Файл {csv_file} не существует.")
         return None
