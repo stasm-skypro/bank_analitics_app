@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
+pandas-stubs = "^2.2.2.240909"
 
 
 [tool.poetry.group.dev.dependencies]

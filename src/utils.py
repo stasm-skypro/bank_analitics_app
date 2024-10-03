@@ -15,31 +15,31 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def _read_csv(csv_file: str) -> pd.DataFrame | None:
+def _read_csv(csv_file: str) -> pd.DataFrame:
     """Принимает на вход путь до CSV-файла и возвращает датафрейм."""
     try:
         csv_data = pd.read_csv(csv_file, delimiter=";")
     except FileNotFoundError:
         logger.error(f"Файл {csv_file} не существует.")
-        return None
+        return pd.DataFrame({})
 
     return csv_data
 
 
-def _read_xlsx(xlsx_file: str) -> pd.DataFrame | None:
+def _read_xlsx(xlsx_file: str) -> pd.DataFrame:
     """Принимает на вход путь до XLSX-файла и возвращает датафрейм."""
     try:
         excel_data = pd.read_excel(xlsx_file, na_filter=False)
     except FileNotFoundError:
         logger.error(f"Файл {xlsx_file} не существует.")
-        return None
+        return pd.DataFrame({})
 
     return excel_data
 
 
 def read_file(file_path: str) -> pd.DataFrame:
     *_, file_extension = file_path.split(".")
-    content = None
+    content = pd.DataFrame()
     match file_extension:
         case "csv":
             content = _read_csv(file_path)
