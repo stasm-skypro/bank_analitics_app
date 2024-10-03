@@ -18,38 +18,43 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     """
     # Если дата не передана, то используем текущую дату.
     if date is None:
-        date = datetime.date.today()
+        date = datetime.datetime.now()
     else:
         date = datetime.datetime.strptime(date, "%d.%m.%Y")
 
-    # Определяем дату на три месяца назад
+    # Определяем дату на три месяца назад.
     three_months_ago = date - datetime.timedelta(3 * 365.25 / 12)
-    print(three_months_ago, date)
+
+    # Преобразуем дату - отрежем время.
+    transactions["Дата операции"] = transactions["Дата операции"].map(lambda x: x[:10])
 
     # Преобразуем строки с датами в datetime объекты.
-    transactions["Дата платежа"] = pd.to_datetime(transactions["Дата платежа"], format="%d.%m.%Y")
+    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], format="%d.%m.%Y")
 
-    # Отрезаем нужные столбцы из датафрейма
+    # Отрезаем нужные столбцы из датафрейма.
     transactions = transactions.loc[
         :,
         [
-            "Дата платежа",
+            "Дата операции",
+            "Номер карты",
+            "Статус",
             "Сумма платежа",
             "Валюта платежа",
             "Категория",
         ],
     ]
 
+    # Отфильтруем в датафрейме нужные столбцы (поля).
     filtered_transactions = transactions[
-        (transactions["Категория"] == category)
-        & (transactions["Дата платежа"] >= three_months_ago)
-        & (transactions["Дата платежа"] <= date)
+        (transactions["Статус"] == "OK")
+        & (transactions["Категория"] == category)
+        & (transactions["Дата операции"] >= three_months_ago)
+        & (transactions["Дата операции"] <= date)
     ]
+    sorted_transactions = filtered_transactions.sort_values(by="Дата операции", ascending=False)
 
-    sorted_transactions = filtered_transactions.sort_values(by="Дата платежа", ascending=False)
-
-    # Преобразуем даты обратно в строковый формат
-    sorted_transactions["Дата платежа"] = sorted_transactions["Дата платежа"].dt.strftime("%d.%m.%Y")
+    # Преобразуем даты обратно в строковый формат.
+    sorted_transactions["Дата операции"] = sorted_transactions["Дата операции"].dt.strftime("%d.%m.%Y")
 
     return sorted_transactions
 
@@ -67,28 +72,50 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     if date is None:
         date = datetime.datetime.now()
     else:
-        date = datetime.datetime.strptime(date, "%d.%m.%Y %H:%M:%S")
+        date = datetime.datetime.strptime(date, "%d.%m.%Y")
 
-    # Определяем дату на три месяца назад
+    # Определяем дату на три месяца назад.
     three_months_ago = date - datetime.timedelta(3 * 365.25 / 12)
     print(three_months_ago, date)
 
+    # Преобразуем дату - отрежем время.
+    transactions["Дата операции"] = transactions["Дата операции"].map(lambda x: x[:10])
+
     # Преобразуем строки с датами в datetime объекты.
-    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], format="%d.%m.%Y")
 
     transactions = transactions.loc[
         :,
         [
             "Дата операции",
+            "Номер карты",
+            "Статус",
             "Сумма платежа",
             "Валюта платежа",
             "Категория",
         ],
     ]
+
+    # Отфильтруем в датафрейме нужные столбцы (поля).
     filtered_transactions = transactions[
-        (transactions["Дата операции"] >= three_months_ago) & (transactions["Дата операции"] <= date)
+        (transactions["Статус"] == "OK")
+        & (transactions["Дата операции"] >= three_months_ago)
+        & (transactions["Дата операции"] <= date)
     ]
-    return filtered_transactions.sort_values(by="Дата операции", ascending=False)
+
+    sorted_transactions = filtered_transactions.sort_values(by="Дата операции", ascending=False)
+
+    # Преобразуем даты обратно в строковый формат.
+    sorted_transactions["Дата операции"] = sorted_transactions["Дата операции"].dt.strftime("%d.%m.%Y")
+
+    # Нужно конвертировать строковые значения трат в числа float.
+    sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: x.replace(",", "."))
+    # Заменим запятую на точку,
+    sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: float(x))
+    # теперь произвыедём конвертацию.
+    grouped_transactions = sorted_transactions.groupby("Дата операции")
+
+    return grouped_transactions["Сумма платежа"].mean().round(2)
 
 
 # Интерфейс трат в рабочий/выходной день
@@ -97,10 +124,10 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
 
 if __name__ == "__main__":
-    transactions_data = read_file("../data/operations.xlsx")
+    transactions_data = read_file("../data/operations.csv")
 
-    result = spending_by_category(transactions_data, "Супермаркеты", "31.12.2021")
-    print(result)
+    # result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
+    # print(result)
 
-    # result = spending_by_weekday(transactions_data, "31.12.2021")
+    # result = spending_by_weekday(transactions_data, "01.12.2021")
     # print(result)

@@ -26,7 +26,7 @@ def _read_csv(csv_file: str) -> pd.DataFrame | None:
     return csv_data
 
 
-def _read_xlsx(xlsx_file: str)->pd.DataFrame | None:
+def _read_xlsx(xlsx_file: str) -> pd.DataFrame | None:
     """Принимает на вход путь до XLSX-файла и возвращает датафрейм."""
     try:
         excel_data = pd.read_excel(xlsx_file, na_filter=False)
@@ -53,4 +53,4 @@ if __name__ == "__main__":
     # print(read_file("../data/operations.csv"))
     # print(read_file("../data/operations.xlsx"))
     # print(read_file("../tests/tests_data/operations.xlsx"))
-    print(read_file("../tests/tests_data/operations.csv"))
+    print(read_file("../tests/tests_data/operations.xlsx"))
