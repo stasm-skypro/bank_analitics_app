@@ -1,4 +1,3 @@
-import csv
 import pandas as pd
 import logging
 
@@ -17,22 +16,22 @@ logger.addHandler(file_handler)
 
 def _read_csv(csv_file: str) -> pd.DataFrame:
     """Принимает на вход путь до CSV-файла и возвращает датафрейм."""
+    csv_data = pd.DataFrame()
     try:
         csv_data = pd.read_csv(csv_file, delimiter=";")
     except FileNotFoundError:
         logger.error(f"Файл {csv_file} не существует.")
-        return pd.DataFrame({})
 
     return csv_data
 
 
 def _read_xlsx(xlsx_file: str) -> pd.DataFrame:
     """Принимает на вход путь до XLSX-файла и возвращает датафрейм."""
+    excel_data = pd.DataFrame()
     try:
         excel_data = pd.read_excel(xlsx_file, na_filter=False)
     except FileNotFoundError:
         logger.error(f"Файл {xlsx_file} не существует.")
-        return pd.DataFrame({})
 
     return excel_data
 

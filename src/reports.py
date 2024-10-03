@@ -1,9 +1,8 @@
 from typing import Optional
 
 import pandas as pd
-
+from datetime import datetime, timedelta
 from src.utils import read_file
-import datetime
 
 
 # Интерфейс трат по категории
@@ -16,14 +15,18 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     Returns:
         отсортированный датафрейм с транзакциями
     """
+    # Если переданный в качестве параметра датафрейм пустой датафрейм
+    if transactions.empty:
+        return transactions
+
     # Если дата не передана, то используем текущую дату.
     if date is None:
-        used_date = datetime.datetime.now()
+        used_date = datetime.now()
     else:
-        used_date = datetime.datetime.strptime(date, "%d.%m.%Y")
+        used_date = datetime.strptime(date, "%d.%m.%Y")
 
     # Определяем дату на три месяца назад.
-    three_months_ago = used_date - datetime.timedelta(3 * 365.25 / 12)
+    three_months_ago = used_date - timedelta(3 * 365.25 / 12)
 
     # Преобразуем дату - отрежем время.
     transactions["Дата операции"] = transactions["Дата операции"].map(lambda x: x[:10])
@@ -68,14 +71,18 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     Returns:
         отсортированный датафрейм с транзакциями
     """
+    # Если переданный в качестве параметра датафрейм пустой датафрейм
+    if transactions.empty:
+        return transactions
+
     # Если дата не передана, то используем текущую дату.
     if date is None:
-        used_date = datetime.datetime.now()
+        used_date = datetime.now()
     else:
-        used_date = datetime.datetime.strptime(date, "%d.%m.%Y")
+        used_date = datetime.strptime(date, "%d.%m.%Y")
 
     # Определяем дату на три месяца назад.
-    three_months_ago = used_date - datetime.timedelta(3 * 365.25 / 12)
+    three_months_ago = used_date - timedelta(3 * 365.25 / 12)
 
     # Преобразуем дату - отрежем время.
     transactions["Дата операции"] = transactions["Дата операции"].map(lambda x: x[:10])
@@ -132,14 +139,18 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
     Returns:
         отсортированный датафрейм с транзакциями
     """
+    # Если переданный в качестве параметра датафрейм пустой датафрейм
+    if transactions.empty:
+        return transactions
+
     # Если дата не передана, то используем текущую дату.
     if date is None:
-        used_date = datetime.datetime.now()
+        used_date = datetime.now()
     else:
-        used_date = datetime.datetime.strptime(date, "%d.%m.%Y")
+        used_date = datetime.strptime(date, "%d.%m.%Y")
 
     # Определяем дату на три месяца назад.
-    three_months_ago = used_date - datetime.timedelta(3 * 365.25 / 12)
+    three_months_ago = used_date - timedelta(3 * 365.25 / 12)
 
     # Преобразуем дату - отрежем время.
     transactions["Дата операции"] = transactions["Дата операции"].map(lambda x: x[:10])
