@@ -1,8 +1,21 @@
+import logging
 from typing import Optional
 
 import pandas as pd
 from datetime import datetime, timedelta
 from src.utils import read_file
+
+
+path = "../logs/reports.log"
+
+# Базовые настройки логгера
+logger = logging.getLogger("reports")
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler(path, "w")
+file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 
 # Интерфейс трат по категории
@@ -17,6 +30,12 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     """
     # Если переданный в качестве параметра датафрейм пустой датафрейм
     if transactions.empty:
+        logger.info(f"Параметр {transactions} содержит пустой датафрейм.")
+        return transactions
+
+    # Если параметр category не задан, то возвращаем пустой датафрейм.
+    if not category:
+        logger.error(f"Параметр {category} должен содержать название категории трат.")
         return transactions
 
     # Если дата не передана, то используем текущую дату.
@@ -58,6 +77,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
 
     # Преобразуем даты обратно в строковый формат.
     sorted_transactions["Дата операции"] = sorted_transactions["Дата операции"].dt.strftime("%d.%m.%Y")
+    logger.info("Функция завершает работу с валидным результатом.")
 
     return sorted_transactions
 
@@ -74,6 +94,7 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     """
     # Если переданный в качестве параметра датафрейм пустой датафрейм
     if transactions.empty:
+        logger.info(f"Параметр {transactions} содержит пустой датафрейм.")
         return transactions
 
     # Если дата не передана, то используем текущую дату.
@@ -125,6 +146,7 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     avg_weekday_spending = grouped_transactions["Сумма платежа"].mean()
     # Выводим результат
     result = pd.DataFrame(avg_weekday_spending)
+    logger.info("Функция завершает работу с валидным результатом.")
 
     return result
 
@@ -140,6 +162,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
     """
     # Если переданный в качестве параметра датафрейм пустой датафрейм
     if transactions.empty:
+        logger.info(f"Параметр {transactions} содержит пустой датафрейм.")
         return transactions
 
     # Если дата не передана, то используем текущую дату.
@@ -201,17 +224,18 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
             "Средние траты": [round(avg_workday_spending, 2), round(avg_weekend_spending, 2)],
         }
     )
+    logger.info("Функция завершает работу с валидным результатом.")
     return result
 
 
 if __name__ == "__main__":
-    # transactions_data = read_file("../data/operations.csv")
-    # result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
-    # print(result)
+    transactions_data = read_file("../data/operations.csv")
+    result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
+    print(result)
 
-    # transactions_data = read_file("../data/operations.csv")
-    # result = spending_by_weekday(transactions_data, "01.12.2021")
-    # print(result)
+    transactions_data = read_file("../data/operations.csv")
+    result = spending_by_weekday(transactions_data, "01.12.2021")
+    print(result)
 
     transactions_data = read_file("../data/operations.csv")
     result = spending_by_workday(transactions_data, "01.12.2021")
