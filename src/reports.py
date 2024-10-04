@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from src.utils import read_file
 
+from decorators.decorators import report_writer
+
 
 path = "../logs/reports.log"
 
@@ -19,6 +21,7 @@ logger.addHandler(file_handler)
 
 
 # Интерфейс трат по категории
+@report_writer()
 def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
     """Функция возвращает траты по заданной категории за последние три месяца (от переданной даты).
     Args:
@@ -83,6 +86,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
 
 
 # Интерфейс трат по дням недели
+@report_writer()
 def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты).
     Args:
@@ -152,6 +156,7 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
 
 # Интерфейс трат в рабочий/выходной день
+@report_writer()
 def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """Функция выводит средние траты в рабочий и в выходной день за последние три месяца (от переданной даты).
     Args:
