@@ -185,7 +185,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     # Добавляем колонку с днем недели
     sorted_transactions["День недели"] = sorted_transactions["Дата операции"].dt.weekday
-
+    print(sorted_transactions)
     # Определяем рабочие и выходные дни
     workdays = sorted_transactions[sorted_transactions["День недели"] < 5]
     weekends = sorted_transactions[sorted_transactions["День недели"] >= 5]
@@ -209,10 +209,10 @@ if __name__ == "__main__":
     # result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
     # print(result)
 
-    transactions_data = read_file("../data/operations.csv")
-    result = spending_by_weekday(transactions_data, "01.12.2021")
-    print(result)
-
     # transactions_data = read_file("../data/operations.csv")
-    # result = spending_by_workday(transactions_data, "01.12.2021")
+    # result = spending_by_weekday(transactions_data, "01.12.2021")
     # print(result)
+
+    transactions_data = read_file("../data/operations.csv")
+    result = spending_by_workday(transactions_data, "01.12.2021")
+    print(result)
