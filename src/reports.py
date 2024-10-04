@@ -70,6 +70,7 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
         date: Optional[str] - опциональная дата, по умолчанию None
     Returns:
         отсортированный датафрейм с транзакциями
+        :rtype: object
     """
     # Если переданный в качестве параметра датафрейм пустой датафрейм
     if transactions.empty:
@@ -118,12 +119,10 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: x.replace(",", "."))
     # Заменим запятую на точку,
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: float(x))
-    # теперь произвыедём конвертацию.
+    # теперь произведём конвертацию.
     grouped_transactions = sorted_transactions.groupby("Дата операции")
-
-    # Средни е траты по дням
+    # Средние траты по дням
     avg_weekday_spending = grouped_transactions["Сумма платежа"].mean()
-
     # Выводим результат
     result = pd.DataFrame(avg_weekday_spending)
 
@@ -206,14 +205,14 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
 
 if __name__ == "__main__":
-    transactions_data = read_file("../data/operations.csv")
-    result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
-    print(result)
+    # transactions_data = read_file("../data/operations.csv")
+    # result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
+    # print(result)
 
     transactions_data = read_file("../data/operations.csv")
     result = spending_by_weekday(transactions_data, "01.12.2021")
     print(result)
 
-    transactions_data = read_file("../data/operations.csv")
-    result = spending_by_workday(transactions_data, "01.12.2021")
-    print(result)
+    # transactions_data = read_file("../data/operations.csv")
+    # result = spending_by_workday(transactions_data, "01.12.2021")
+    # print(result)
