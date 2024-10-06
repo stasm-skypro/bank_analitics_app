@@ -52,7 +52,12 @@
     pass</code>
 
 ### Пример работы функции main
-**Программа приветствует пользователя:**
+Программа приветствует пользователя, затем просит ввести начальную дату и название категории.
+Затем выводит в консоль результаты расчётов.
+Также результаты расчётов сохраняются в файлы:
+spending_by_category_report.log
+spending_by_weekday_report.log
+spending_by_workday_report.log
 
 ## Документация и ссылки.
 Полное описание задания и ТЗ к функциям находятся по [ссылке](https://my.sky.pro/student-cabinet/stream-module/19727/course-final-work/materials).

@@ -36,8 +36,7 @@ def test_report_writer14() -> None:
         with open("tests_data/report_writer_sample.log", "r", encoding="utf-8") as file:
             result = file.readlines()[-1]
             expected = re.compile(
-                r"""Отчёт записан \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}. my_func error: Inputs: .\d+, '\d+'.. 
-                Error: unsupported operand type.s. for .: 'int' and 'str'"""
+                r"""Отчёт записан \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}. my_func error: Inputs: .\d+, '\d+'.. Error: unsupported operand type.s. for .: 'int' and 'str'"""
             )
             match = expected.fullmatch(result.rstrip("\n"))
             if match is not None:
@@ -53,3 +52,7 @@ def test_report_writer21() -> None:
         match = expected.fullmatch(result.rstrip("\n"))
         if match is not None:
             assert match.string == result.rstrip("\n")
+
+
+if __name__ == "__main__":
+    test_report_writer11()

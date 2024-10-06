@@ -17,7 +17,7 @@ def test_spending_by_category_failure() -> None:
 class TestSpendingByCategory(unittest.TestCase):
 
     @patch("src.reports.datetime")
-    def test_spending_by_category(self, mock_datetime) -> None:
+    def test_spending_by_category(self, mock_datetime: pd.DataFrame) -> None:
         """Тестируем работу функции spending_by_category с валидными аргументами."""
         # Настройка mock для текущей даты
         mock_datetime.now.return_value = datetime(2024, 10, 3)
@@ -53,7 +53,7 @@ class TestSpendingByCategory(unittest.TestCase):
         pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_df.reset_index(drop=True))
 
     @patch("src.reports.datetime")
-    def test_spending_by_weekday(self, mock_datetime) -> None:
+    def test_spending_by_weekday(self, mock_datetime: pd.DataFrame) -> None:
         """Тестируем работу функции spending_by_weekday с валидными аргументами."""
         # Настройка mock для текущей даты
         mock_datetime.now.return_value = datetime(2024, 10, 3)
@@ -88,7 +88,7 @@ class TestSpendingByCategory(unittest.TestCase):
         pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_df.reset_index(drop=True))
 
     @patch("src.reports.datetime")
-    def test_spending_by_workday(self, mock_datetime) -> None:
+    def test_spending_by_workday(self, mock_datetime: pd.DataFrame) -> None:
         """Тестируем работу функции spending_by_workday с валидными аргументами."""
         # Настройка mock для текущей даты
         mock_datetime.now.return_value = datetime(2024, 10, 3)

@@ -50,7 +50,7 @@ def report_writer(filename: str | None = None) -> Any:
 if __name__ == "__main__":
 
     # @report_writer()
-    def my_func(x, y):
+    def my_func(x: int, y: int) -> int:
         return x + y
 
     # print(my_func(2, 3))
