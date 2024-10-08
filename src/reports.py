@@ -6,14 +6,14 @@ from datetime import datetime, timedelta
 from src.utils import read_file
 
 from decorators.decorators import report_writer
+import os
 
-
-path = "../logs/reports.log"
+logger_fullpath = os.path.abspath("../logs/reports.log")
 
 # Базовые настройки логгера
 logger = logging.getLogger("reports")
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(path, "w")
+file_handler = logging.FileHandler(logger_fullpath, "w")
 file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
 
 file_handler.setFormatter(file_formatter)
