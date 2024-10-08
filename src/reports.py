@@ -94,7 +94,6 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
         date: Optional[str] - опциональная дата, по умолчанию None
     Returns:
         отсортированный датафрейм с транзакциями
-        :rtype: object
     """
     # Если переданный в качестве параметра датафрейм пустой датафрейм
     if transactions.empty:
