@@ -1,9 +1,15 @@
 import datetime
-from typing import Optional
+import json
+
+from typing import Optional, Any
 
 import pandas as pd
 
 from src.utils import read_file
+
+import requests
+import os
+from dotenv import load_dotenv
 
 
 def get_date_interval(date_string):
@@ -132,8 +138,27 @@ def spanding_by_card_numbers(transactions: pd.DataFrame, first_date: Optional[st
     return sums_by_card, cashback_by_card, top_transactions
 
 
-def get_currency_rate(currency_list: list):
-    pass
+def get_currency_rate(from_currency: str, to_currency: str):
+    # Загрузка переменных из .env-файла и получение значения API_KEY
+    load_dotenv()
+    API_KEY = os.getenv("API_KEY")
+
+    url = "https://api.apilayer.com/exchangerates_data/convert"
+    payload: dict[Any, Any] = {"amount": str(1), "from": from_currency, "to": to_currency}
+    headers = {"apikey": API_KEY}
+
+    response = requests.request("GET", url, headers=headers, params=payload)
+
+    status_code = response.status_code
+    # Если запрос обработан успешно (код 200), то возвращаем значение валюты после конвертации.
+    if status_code == 200:
+        result = json.loads(response.text)["info"]["rate"]
+        return float(result)
+
+    # Иначе возвращаем причину ошибки.
+    else:
+        return response.reason
+
 
 
 def get_responce(date):
@@ -141,22 +166,26 @@ def get_responce(date):
 
 
 if __name__ == "__main__":
-    # Считываем из файла с трансакциями датафрейм
-    transactions_data = read_file("../data/operations.csv")
-
-    # Определяем интервал дат в соответствии с ТЗ
-    input_date = "2021-12-15 20:00:00"
-    date_interval = get_date_interval(input_date)
-
-    # Отсортируем датафрейм по тем полям, которые в дальнейшем будем использовать.
-    sums_by_cards, cashback_by_cards, top_transactions = spanding_by_card_numbers(transactions_data, *date_interval)
-    print(sums_by_cards)
-    print()
-    print(cashback_by_cards)
-    print()
-    print(top_transactions)
+    # # Считываем из файла с трансакциями датафрейм
+    # transactions_data = read_file("../data/operations.csv")
+    #
+    # # Определяем интервал дат в соответствии с ТЗ
+    # input_date = "2021-12-15 20:00:00"
+    # date_interval = get_date_interval(input_date)
+    #
+    # # Отсортируем датафрейм по тем полям, которые в дальнейшем будем использовать.
+    # sums_by_cards, cashback_by_cards, top_transactions = spanding_by_card_numbers(transactions_data, *date_interval)
+    # print(sums_by_cards)
+    # print()
+    # print(cashback_by_cards)
+    # print()
+    # print(top_transactions)
 
     # Получим курсы валют из внешенго API.
-    rates = get_currency_rate(caurrencies)
+    currencies = ["USD", "EUR"]
+    rates = []
+    for currency in currencies:
+        rate = get_currency_rate(currency, "RUB")
+        rates.append(rate)
     print()
     print(rates)
