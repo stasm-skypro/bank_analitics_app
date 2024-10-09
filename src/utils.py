@@ -1,6 +1,7 @@
-import pandas as pd
 import logging
 import os
+
+import pandas as pd
 
 logger_fullpath = os.path.abspath("../logs/utils.log")
 

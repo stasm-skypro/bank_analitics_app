@@ -15,7 +15,6 @@ def test_spending_by_category_failure() -> None:
 
 # Пример данных для тестирования
 class TestSpendingByCategory(unittest.TestCase):
-
     @patch("src.reports.datetime")
     def test_spending_by_category(self, mock_datetime: pd.DataFrame) -> None:
         """Тестируем работу функции spending_by_category с валидными аргументами."""

@@ -1,5 +1,5 @@
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 
 def _write_file(filename: str, text: str) -> None:

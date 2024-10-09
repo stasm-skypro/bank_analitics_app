@@ -1,12 +1,12 @@
 import logging
+import os
+from datetime import datetime, timedelta
 from typing import Optional
 
 import pandas as pd
-from datetime import datetime, timedelta
-from src.utils import read_file
 
 from decorators.decorators import report_writer
-import os
+from src.utils import read_file
 
 logger_fullpath = os.path.abspath("../logs/reports.log")
 
@@ -139,11 +139,11 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     # Преобразуем даты обратно в строковый формат.
     sorted_transactions["Дата операции"] = sorted_transactions["Дата операции"].dt.strftime("%d.%m.%Y")
 
-    # Нужно конвертировать строковые значения трат в числа float.
+    # Нужно конвертировать строковые значения трат в числа float. Сначала заменим запятую на точку,
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: x.replace(",", "."))
-    # Заменим запятую на точку,
+    # Произведём конвертацию формата.
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: float(x))
-    # теперь произведём конвертацию.
+    # Теперь сгруппируем по дате операции.
     grouped_transactions = sorted_transactions.groupby("Дата операции")
     # Средние траты по дням
     avg_weekday_spending = grouped_transactions["Сумма платежа"].mean()
@@ -205,12 +205,12 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     sorted_transactions = recent_transactions.sort_values(by="Дата операции", ascending=False)
 
-    # Нужно конвертировать строковые значения трат в числа float.
+    # Нужно конвертировать строковые значения трат в числа float. Сначала заменим запятую на точку,
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: x.replace(",", "."))
-    # Заменим запятую на точку,
+    # Произведём конвертацию формата.
     sorted_transactions["Сумма платежа"] = sorted_transactions["Сумма платежа"].map(lambda x: float(x))
 
-    # Добавляем колонку с днем недели
+    # Добавляем поле с днем недели
     sorted_transactions["День недели"] = sorted_transactions["Дата операции"].dt.weekday
     print(sorted_transactions)
     # Определяем рабочие и выходные дни

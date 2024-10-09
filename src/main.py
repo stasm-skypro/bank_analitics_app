@@ -1,6 +1,5 @@
-from src.utils import read_file
 from src.reports import spending_by_category, spending_by_weekday, spending_by_workday
-
+from src.utils import read_file
 
 if __name__ == "__main__":
     transactions_data = read_file("../data/operations.csv")
