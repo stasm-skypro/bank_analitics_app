@@ -1,19 +1,18 @@
 import logging
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 
 import pandas as pd
 
-from decorators.decorators import report_writer
+from src.decorators import report_writer
 from src.utils import read_file
 
-logger_fullpath = os.path.abspath("../logs/reports.log")
+logger_path = "../logs/reports.log"
 
 # Базовые настройки логгера
 logger = logging.getLogger("reports")
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(logger_fullpath, "w")
+file_handler = logging.FileHandler(logger_path, "w")
 file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
 
 file_handler.setFormatter(file_formatter)
@@ -212,7 +211,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     # Добавляем поле с днем недели
     sorted_transactions["День недели"] = sorted_transactions["Дата операции"].dt.weekday
-    print(sorted_transactions)
+
     # Определяем рабочие и выходные дни
     workdays = sorted_transactions[sorted_transactions["День недели"] < 5]
     weekends = sorted_transactions[sorted_transactions["День недели"] >= 5]
@@ -222,17 +221,18 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
     avg_weekend_spending = weekends["Сумма платежа"].mean()
 
     # Выводим результат
-    result = pd.DataFrame(
+    result_data = pd.DataFrame(
         {
             "День": ["Рабочий", "Выходной"],
             "Средние траты": [round(avg_workday_spending, 2), round(avg_weekend_spending, 2)],
         }
     )
     logger.info("Функция завершает работу с валидным результатом.")
-    return result
+    return result_data
 
 
 if __name__ == "__main__":
+
     transactions_data = read_file("../data/operations.csv")
     result = spending_by_category(transactions_data, "Супермаркеты", "01.12.2021")
     print(result)

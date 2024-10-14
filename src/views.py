@@ -1,29 +1,27 @@
 import datetime
 import json
-
-from typing import Optional, Any
+import os
+from typing import Any
 
 import pandas as pd
+import requests
+from dotenv import load_dotenv
 
 from src.utils import read_file
 
-import requests
-import os
-from dotenv import load_dotenv
 
-
-def get_date_interval(date_string):
-    """Функция определяет диапазон дат на основе правила - с начала месяца, на который выпадает входящая дата,
-    по входящую дату.
+def get_date_interval(date_string: str) -> tuple:
+    """Функция определяет диапазон дат на основе правила - с начала месяца,
+    на который выпадает входящая дата, по входящую дату.
     Args:
         date_string: Строкове представление входящей даты в формате 'dd.mm.yyyy'.
     Returns:
-        begin_date: Строковое представление начала месяца, на который выпадает входящая дата - первая граница диапазона,
+        begin_date: Строковое представление начала месяца, на который выпадает входящая дата - первая граница диапазона
         date: Строковое представление входящей даты - вторая граница диапазона.
     """
-    date, time = date_string.split()
+    only_date, _ = date_string.split()
 
-    date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    date = datetime.datetime.strptime(only_date, "%Y-%m-%d")
     year = date.year
     month = date.month
     begin_date = datetime.date(year, month, 1)
@@ -31,7 +29,7 @@ def get_date_interval(date_string):
     return begin_date.strftime("%d.%m.%Y"), date.strftime("%d.%m.%Y")
 
 
-def get_greeting(date_string):
+def get_greeting(date_string: str) -> str:
     """Функция возвращает приветствие: «Доброе утро» / «Добрый день» / «Добрый вечер» / «Доброй ночи» в зависимости
     от текущего времени. Правило:
     Утро: с 4:00 до 11:00 включительно,
@@ -39,8 +37,8 @@ def get_greeting(date_string):
     Вечер: с 17:00 до 23:00 включительно,
     Ночь: с 0:00 до 3:00 включительно.
     """
-    date, time = date_string.split()
-    time = datetime.datetime.strptime(time, "%H:%M:%S").time()
+    _, only_time = date_string.split()
+    time = datetime.datetime.strptime(only_time, "%H:%M:%S").time()
     greeting = ""
     if (
         datetime.datetime.strptime("11:59:59", "%H:%M:%S").time()
@@ -63,7 +61,7 @@ def get_greeting(date_string):
     elif (
         datetime.datetime.strptime("03:59:59", "%H:%M:%S").time()
         >= time
-        > datetime.datetime.strptime("24:00:00", "%H:%M:%S").time()
+        > datetime.datetime.strptime("00:00:00", "%H:%M:%S").time()
     ):
         greeting = "Доброй ночи"
 
@@ -71,7 +69,7 @@ def get_greeting(date_string):
 
 
 def spending_by_card_numbers(transactions: pd.DataFrame, first_date: str, last_date: str) -> tuple:
-    """Функция обрабатывает входящий датафрей и возращает:
+    """Функция обрабатывает входящий датафрейм и возвращает:
     1. Последние 4 цифры номера карты.
     2. Общую сумму расходов по каждой карте.
     3. Кэшбэк (1 рубль на каждые 100 рублей) по каждой карте.
@@ -94,13 +92,7 @@ def spending_by_card_numbers(transactions: pd.DataFrame, first_date: str, last_d
 
     # Отрезаем нужные столбцы из датафрейма.
     transactions = transactions.loc[
-        :,
-        [
-            "Дата операции",
-            "Номер карты",
-            "Сумма платежа",
-            "Валюта платежа",
-        ],
+        :, ["Дата операции", "Номер карты", "Сумма платежа", "Валюта платежа", "Категория", "Описание"]
     ]
 
     # Отфильтруем в датафрейме нужные столбцы (поля) и сортируем по дате операции.
@@ -121,23 +113,23 @@ def spending_by_card_numbers(transactions: pd.DataFrame, first_date: str, last_d
     sorted_transactions = recent_transactions.sort_values(by="Сумма платежа", ascending=False)
 
     # Отрежем топ-5 платежей по убыванию.
-    top_transactions = sorted_transactions.iloc[:5, :]
+    top_transactions = sorted_transactions.iloc[:5, :].to_dict(orient="records")
 
     # Сгруппируем операции по номеру карты
     grouped_transactions_by_card = sorted_transactions.groupby("Номер карты")
     # Посчитаем суммы трат по номерам карт.
-    sums_by_card = grouped_transactions_by_card["Сумма платежа"].sum()
+    sums_by_card = grouped_transactions_by_card["Сумма платежа"].sum().round(2).to_dict()
     # Посчитаем кэшбэки по номерам карт.
-    cashback_by_card = grouped_transactions_by_card["Кэшбэк"].sum()
+    cashback_by_card = grouped_transactions_by_card["Кэшбэк"].sum().round(2).to_dict()
 
     return sums_by_card, cashback_by_card, top_transactions
 
 
-def get_currency_rate(from_currency: str, to_currency: str)->str | float:
+def get_currency_rate(from_currency: str, to_currency: str) -> str | float:
     """Функция делает запрос к внешнему API и возвращает курс валюты.
     Args:
-        from_currency: str - Код валюты, из которой нужно произвести конвертацию
-        to_currency: str - Код валюты, в которую нужно произвести конвертацию
+        from_currency: str - Код исходной валюты
+        to_currency: str - Код конечной валюты
     Returns:
         float: курс валюты
     """
@@ -162,7 +154,7 @@ def get_currency_rate(from_currency: str, to_currency: str)->str | float:
         return response.reason
 
 
-def get_stock_prices(symbols: list)->dict:
+def get_stock_prices(symbols: list) ->dict:
     """
     Функция возвращает стоимости акций на бирже S&P500.
     Args:
@@ -180,72 +172,101 @@ def get_stock_prices(symbols: list)->dict:
         response = requests.get(f"{api_url}{symbol}?apikey={api_key}")
         data = response.json()
         if data:
-            stock_prices[symbol] = data[0]['price']
+            stock_prices[symbol] = data[0]["price"]
         else:
             stock_prices[symbol] = None
 
     return stock_prices
 
 
-def get_response(input_date: str):
+def get_response(date: str) -> dict:
+    """Функция принимает на вход строку с датой и временем в формате YYYY-MM-DD HH:MM:SS и возвращающую JSON-ответ.
+    Args:
+        date: str - Строка с датой
+    Returns:
+        json_response: json - словарь с выходными данными. Пример выходных данных:
+        {
+        "greeting": "Добрый день",
+        "cards": [
+            {"last_digits": "5814", "total_spent": 1262.00, "cashback": 12.62},
+            {"last_digits": "7512", "total_spent": 7.94, "cashback": 0.08}
+        ],
+        "top_transactions": [
+            {"date": "21.12.2021", "amount": 1198.23, "category": "Переводы",
+             "description": "Перевод Кредитная карта. ТП 10.2 RUR"},
+            {"date": "20.12.2021", "amount": 829.00, "category": "Супермаркеты", "description": "Лента"},
+            {"date": "20.12.2021", "amount": 421.00, "category": "Различные товары", "description": "Ozon.ru"},
+            {"date": "16.12.2021", "amount": -14216.42, "category": "ЖКХ", "description": "ЖКУ Квартира"},
+            {"date": "16.12.2021", "amount": 453.00, "category": "Бонусы", "description": "Кешбэк за обычные покупки"}
+        ],
+        "currency_rates": [{"currency": "USD", "rate": 73.21}, {"currency": "EUR", "rate": 87.08}],
+        "stock_prices": [
+            {"stock": "AAPL", "price": 150.12},
+            {"stock": "AMZN", "price": 3173.18},
+            {"stock": "GOOGL", "price": 2742.39},
+            {"stock": "MSFT", "price": 296.71},
+            {"stock": "TSLA", "price": 1007.08}
+        ]
+    }
+    """
+
+    # Получим приветствие в соответствии с временем суток согласно ТЗ.
+    greeting_string = get_greeting(date)
 
     # Определяем интервал дат в соответствии с ТЗ
-    date_interval = get_date_interval(input_date)
+    date_interval = get_date_interval(date)
 
-    # Считываем из файла с трансакциями датафрейм
+    # Считываем из файла с транзакциями датафрейм
     transactions_data = read_file("../data/operations.csv")
-    # Отсортируем датафрейм по тем полям, которые в дальнейшем будем использовать.
+
+    # Получим по каждой карте: последние 4 цифры карты, общая сумма расходов, кешбэк (1 рубль на каждые 100 рублей) и
+    # Топ-5 транзакций по сумме платежа.
     sums_by_cards, cashback_by_cards, top_transactions = spending_by_card_numbers(transactions_data, *date_interval)
+
+    cards_list = [
+        {"last_digits": spnd[0][1:], "total_spent": spnd[1], "cashback": csbk[1]}
+        for spnd, csbk in zip(sums_by_cards.items(), cashback_by_cards.items())
+    ]
+
+    top_transactions_list = [
+        {
+            "date": str(rds["Дата операции"]),
+            "amount": rds["Сумма платежа"],
+            "category": rds["Категория"],
+            "description": rds["Описание"],
+        }
+        for rds in top_transactions
+    ]
 
     # Получим курсы валют из внешнего API.
     currencies = ["USD", "EUR"]
-    rates = []
+    currency_rates_list = []
     for currency in currencies:
         rate = get_currency_rate(currency, "RUB")
-        rates.append(rate)
+        currency_rates_list.append({"currency": currency, "rate": round(float(rate), 2)})
 
-    # Получим стоимости акций на бирже S&P500 из списка.
+    # Получим стоимости акций на бирже S&P500 из внешнего API.
     symbols = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
     prices = get_stock_prices(symbols)
+    stock_prices_list = [{"stock": k, "price": v} for k, v in prices.items()]
 
     json_response = {
-
+        "greeting": greeting_string,
+        "cards": cards_list,
+        "top_transactions": top_transactions_list,
+        "currency_rates": currency_rates_list,
+        "stock_prices": stock_prices_list,
     }
 
-
+    return json_response
 
 
 if __name__ == "__main__":
-    # # Определяем интервал дат в соответствии с ТЗ
+    # Получим стоимости акций на бирже S&P500 из внешнего API.
+    symbols = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+    prices = get_stock_prices(symbols)
+    print(prices)
+
     # input_date = "2021-12-15 20:00:00"
-    # date_interval = get_date_interval(input_date)
-
-
-    # # Считываем из файла с трансакциями датафрейм
-    # transactions_data = read_file("../data/operations.csv")
-    # # Отсортируем датафрейм по тем полям, которые в дальнейшем будем использовать.
-    # sums_by_cards, cashback_by_cards, top_transactions = spending_by_card_numbers(transactions_data, *date_interval)
-    # # print(sums_by_cards)
-    # # print()
-    # # print(cashback_by_cards)
-    # # print()
-    # # print(top_transactions)
-
-
-    # # Получим курсы валют из внешнего API.
-    # currencies = ["USD", "EUR"]
-    # rates = []
-    # for currency in currencies:
-    #     rate = get_currency_rate(currency, "RUB")
-    #     rates.append(rate)
-    # # print()
-    # # print(rates)
-
-
-    # # Получим стоимости акций на бирже S&P500 из списка.
-    # symbols = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
-    # prices = get_stock_prices(symbols)
-    # # print(prices)
-
-    input_date = "2021-12-15 20:00:00"
-    get_response(input_date)
+    # json_result = get_response(input_date)
+    # print(json_result)

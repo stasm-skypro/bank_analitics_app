@@ -3,12 +3,10 @@ import os
 
 import pandas as pd
 
-logger_fullpath = os.path.abspath("../logs/utils.log")
-
 # Базовые настройки логгера
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(logger_fullpath, "w")
+file_handler = logging.FileHandler("../logs/utils.log", "w")
 file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
 
 file_handler.setFormatter(file_formatter)
@@ -54,7 +52,8 @@ def read_file(file_path: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+
     print(read_file("../data/operations.csv"))
-    # print(read_file("../data/operations.xlsx"))
-    # print(read_file("../tests/tests_data/operations.xlsx"))
-    # print(read_file("../tests/tests_data/operations.xlsx"))
+    print(read_file("../data/operations.xlsx"))
+    print(read_file("../tests/tests_data/operations.xlsx"))
+    print(read_file("../tests/tests_data/operations.xlsx"))
